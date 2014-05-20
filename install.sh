@@ -1,50 +1,49 @@
 #!/bin/bash
 #
-# Created:  Fri 01 Mar 2013 10:31:23 AM CET
-# Modified: Fri 09 May 2014 11:42:08 am CEST
 # Author:   Bert Van Vreckem <bert.vanvreckem@gmail.com>
 #
-# Install selected scripts in the user's bin directory
+# Install selected scripts in the user's ~/bin directory by creating symbolic
+# links to the actual scripts. The links will have their extension removed.
+#
+# Thes scripts should be stored in a subdirectory src/. If you want a script to
+# be installed, just make it executable, otherwise it will be skipped.
 #
 
-# base names (no extension) of the scripts to be installed
-TO_INSTALL="backup screencast add-vim-bundle"
-
 # installation destination directory
-DST_DIR=~/bin
+dst_dir=${HOME}/bin
 
 # directory where this script is located (should contain
 # subdirectory src/ containing the actual scripts
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # script directory
-SRC_DIR=${SCRIPT_DIR}/src
+src_dir=${script_dir}/src
+
+# scripts to be installed. If you want a script to be installed, make it
+# executable
+to_install=$(find ${src_dir} -type f -executable -printf '%f\n')
 
 
-for s in $(echo ${TO_INSTALL}); do
-  echo $s
+for s in $(echo ${to_install}); do
   # determine path to source and destination files
-  SRC=${SRC_DIR}/${s}.sh
-  DST=${DST_DIR}/${s}
+  source_file=${src_dir}/${s}
+  destination_file=${dst_dir}/${s%.*}  # remove extension from link
 
-  if [[ ! -f "${SRC}" ]]; then
+  if [[ ! -f "${source_file}" ]]; then
 
     # Source script not found
-    echo "Skipping nonexistent ${SRC}" >&2
+    echo "Skipping nonexistent ${source_file}" >&2
 
   else
 
-    # make sure the script is executable
-    chmod 750 "${SRC}"
-
     # If the destination directory already contains a script
     # that is not a link, it should not be overwritten
-    if [[ -f "${DST}" && ! -h "${DST}" ]]; then
-      echo "Skipping ${DST}: already exists, is a regular file" >&2
+    if [[ -f "${destination_file}" && ! -h "${destination_file}" ]]; then
+      echo "Skipping ${destination_file}: already exists, is a regular file" >&2
     fi
-    
+
     # create the link
-    ln -sf ${SRC} ${DST}
+    ln -vsf ${source_file} ${destination_file}
 
   fi
 done
