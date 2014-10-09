@@ -21,7 +21,7 @@ src_dir=${script_dir}/src
 
 # scripts to be installed. If you want a script to be installed, make it
 # executable
-to_install=$(find ${src_dir} -type f -executable -printf '%f\n')
+to_install=$(find ${src_dir} -type f \( -executable -and ! -iname ".*" \) -printf '%f\n')
 
 
 for s in $(echo ${to_install}); do
