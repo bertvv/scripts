@@ -11,8 +11,8 @@ sources=/usr/share/dict/words #/usr/share/dict/dutch
 wordlist=$(mktemp) || exit 2
 
 for src in ${sources}; do
-    # take words from 2-10 chars and  avoid azerty/qwerty-confusion
-    grep '^[[:alnum:]]\{2,10\}$' ${src} \
+    # take words from 2-7 chars and  avoid azerty/qwerty-confusion
+    grep '^[[:alnum:]]\{2,7\}$' ${src} \
       > ${wordlist}
 #      | grep -iv "[amqwz]" \
 done
