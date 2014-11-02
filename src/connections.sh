@@ -8,10 +8,10 @@
 set -e # abort on nonzero exitstatus
 set -u # abort on unbound variable
 
-#{{{ Variables
+ #{{{ Variables
 
 #}}}
-#{{{ Functions
+# {{{ Functions
 
 usage() {
 cat << _EOF_
@@ -33,20 +33,20 @@ strip_port() {
 
 # Perform a reverse DNS lookup, only returning the host name
 reverse_lookup() {
-  dig -x $1 +short | head -1
+  dig -x "$1" +short | head -1
 }
 
 # Use whois to find out the network name
 network_name() {
-  whois $1 | grep -i netname | head -1 | awk '{print $2}'
+  whois "$1" | grep -i netname | head -1 | awk '{print $2}'
 }
 
 print_host_info() {
   local ip=$1
-  local host=$(reverse_lookup ${ip})
-  local netname=$(network_name ${ip})
+  local host=$(reverse_lookup "${ip}")
+  local netname=$(network_name "${ip}")
 
-  printf "%16s %20s %s\n"  ${ip} ${netname} ${host}
+  printf "%16s %20s %s\n"  "${ip}" "${netname}" "${host}"
 }
 
  #}}}
@@ -70,5 +70,5 @@ fi
 # Script proper
 
 for ip in $(active_hosts); do
-  print_host_info ${ip}
+  print_host_info "${ip}"
 done
