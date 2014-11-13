@@ -3,12 +3,14 @@
 # Source: https://gist.github.com/namuol/9122237/
 #
 # Rage-quit support for Bash
+#
+# {{{ Preamble
 
-set -e # abort on nonzero exitstatus
 set -u # abort on unbound variable
 
-#{{{ Functions
+# {{{ Functions
 
+# Print usage message
 usage() {
 cat >&2 <<_EOF_
 Usage: ${0} ACTION PROCESS
@@ -20,36 +22,52 @@ Usage: ${0} ACTION PROCESS
 _EOF_
 }
 
+# Print the specified message upside down
+# Parameters:
+#   $1 -- a string
 flip() {
-  perl -C3 -Mutf8 -lpe '$_=reverse;y/a-zA-Z.['\'',({?!\"<_;‿⁅∴\r/ɐqɔpǝɟƃɥıɾʞ|ɯuodbɹsʇnʌʍxʎzɐqɔpǝɟƃɥıɾʞ|ɯuodbɹsʇnʌʍxʎz˙],'\'')}¿¡,>‾؛⁀⁆∵\n/' <<< "$1"
+  perl -C3 -Mutf8 -lpe '$_=reverse;y/a-zA-Z1234567890.['\'',({?!\"<_;‿⁅∴\r/ɐqɔpǝɟƃɥıɾʞ|ɯuodbɹsʇnʌʍxʎzɐqɔpǝɟƃɥıɾʞ|ɯuodbɹsʇnʌʍxʎz⇂zƐㄣϛ9ㄥ860˙],'\'')}¿¡,>‾؛⁀⁆∵\n/' <<< "$1"
 }
 
-#}}}
-#{{{ Command line parsing
+# Print message when killing the process(es) fails
+fail_msg() {
+  local messages=("(；￣Д￣)" "┬─┬ ︵ /(.□. \）" "y=ｰ( ﾟдﾟ)･∵." "(；⌣̀_⌣́)")
+  local message="${messages[$RANDOM % ${#messages[@]}]}"
+
+  echo ; echo "${message} . o O ( That didn’t work )"; echo
+}
+
+# Print message when killing the specified process(es) succeeds
+# Parameters:
+#   $1 -- the name of the process that was killed
+success_msg() {
+  faces=('(ノಠ-ಠ)ノ彡' '(╯°□°）╯︵' '(ノಠ益ಠ)ノ彡' '(ノ ゜Д゜)ノ ︵' '(ﾉಥДಥ)ﾉ︵' ' ヽ(`Д´)ﾉ︵')
+  face="${faces[$RANDOM % ${#faces[@]}]}"
+
+  echo ; echo "${face}$(flip "${program}")"; echo
+}
+
+# }}}
+# {{{ Command line parsing
 
 if [ "$#" -ne "2" ]; then
-    echo "Expected 2 arguments, got $#" >&2
+    echo "┬─┬ ノ( ゜-゜ノ) patience young grasshopper" >&2
     usage
     exit 2
 fi
 
-#}}}
-#{{{ Variables
+# }}}
+# {{{ Variables
 
-people=('(ノಠ-ಠ)ノ彡' '(╯°□°）╯︵' '(ノಠ益ಠ)ノ彡')
-person="${people[$RANDOM % ${#people[@]}]}"
 action=$1
 program=$2
 
-##}}}
-## Script proper
-
-case $action in
+case ${action} in
   you)
-    killall "${program}" && (echo ; echo "${person}$(flip "${program}")"; echo)
+    sig="-9"
     ;;
   off)
-    killall -9 "${program}" && (echo ; echo "${person}$(flip "${program}") ------ -- -- ╾━╤デ╦︻"; echo)
+    sig="-15"
     ;;
   *)
     echo "Unknown action: ${action}" >&2
@@ -57,3 +75,18 @@ case $action in
     exit 1
     ;;
 esac
+
+# }}}
+# }}}
+
+## Script proper
+
+pkill "${sig}" "${program}"
+exit_status=$?
+
+if [ "${exit_status}" -eq "0" ]; then
+  success_msg "${program}"
+else
+  fail_msg "${program}"
+  exit ${exit_status}
+fi
