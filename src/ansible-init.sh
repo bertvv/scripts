@@ -5,7 +5,6 @@
 # Initialise an Ansible project, based on 
 # https://github.com/bertvv/ansible-skeleton/
 
-set -e # abort on nonzero exitstatus
 set -u # abort on unbound variable
 
 #{{{ Variables
@@ -20,6 +19,21 @@ Usage: ${0} PROJECT_NAME [ROLE]...
   https://github.com/bertvv/ansible-skeleton
   and optionally, installs the specified roles from Ansible Galaxy
 _EOF_
+}
+
+install_role() {
+  # First, try to install from Ansible Galaxy directly
+  ansible-galaxy install -p ansible/roles "${1}"
+
+  if [ "$?" -ne "0" ]; then
+    echo " ## This does not seem to be an Ansible role. Trying Github"
+    user=${1%%\.*}
+    role=${1##*\.}
+    rolename=${role##ansible-}
+    git_url="https://github.com/${user}/${role}.git"
+    echo " ## => ${git_url}"
+    git clone "${git_url}" "ansible/roles/${user}.${rolename}"
+  fi
 }
 
 #}}}
@@ -59,6 +73,6 @@ git add .
 git commit --message "Initial commit, Ansible skeleton"
 
 for role in "${@}"; do
-  ansible-galaxy install -p ansible/roles "${role}"
+  install_role "${role}"
 done
 
