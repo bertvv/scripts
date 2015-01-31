@@ -4,144 +4,142 @@
 # we search backup.conf in /etc/, and if this neither exists,
 # we use the one in the current directory
 
+set -o nounset # Abort on unbound variable
+
+cur_dir=$(dirname "${0}")
+
 if test -r ~/.backup/backup.conf
 then
-	source ~/.backup/backup.conf
-	EXCLUDEFILE=~/.backup/exclude.lst
+  source ~/.backup/backup.conf
+  excludefile=~/.backup/exclude.lst
 elif test -r /etc/backup/backup.conf
 then
-	source /etc/backup/backup.conf
-	EXCLUDEFILE=/etc/backup/exclude.lst
+  source /etc/backup/backup.conf
+  excludefile=/etc/backup/exclude.lst
 elif test -r ./backup.conf
 then
-	source ./backup.conf
-	EXCLUDEFILE=`pwd`/exclude.lst
-elif test -r `dirname $0`/backup.conf
+  source ./backup.conf
+  excludefile="$(pwd)/exclude.lst"
+elif test -r "${cur_dir}/backup.conf"
 then
-	source `dirname $0`/backup.conf
-	EXCLUDEFILE=`dirname $0`/exclude.lst
+  source "${cur_dir}/backup.conf"
+  excludefile="${cur_dir}/exclude.lst"
 else
-	echo "No configuration file found. Please create a backup.conf"
-	echo "file based on the one included in the source tarball"
-	exit 1
+  echo "No configuration file found. Please create a backup.conf"
+  echo "file based on the one included in the source tarball"
+  exit 1
 fi
 
-NOW=`date +%F-%H-%M-%S`
-HOST=`hostname`
-LOGTEMP=`mktemp /tmp/backup.XXXXX`
-CMDFILE=`mktemp /tmp/backup.XXXXX`
+now=$(date +%F-%H-%M-%S)
+host=$(hostname)
+log_temp=$(mktemp /tmp/backup.XXXXX)
+cmd_file=$(mktemp /tmp/backup.XXXXX)
 
-case `uname` in
- 
-	"Linux") NIC="eth0"
-		 ;;
-	"Darwin") NIC="en0"
-		  ;;
-esac
-
-# Make sure $EXCLUDEFILE exists, otherwise we'll get errors from rsync
-if test ! -f $EXCLUDEFILE
+# Make sure "${excludefile}" exists, otherwise we'll get errors from rsync
+if test ! -f "${excludefile}"
 then
-	touch $EXCLUDEFILE
+  touch "${excludefile}"
 fi
 
 # Actually check if we have a meaningful hostname
-if test ${HOST}x == 'x' -o ${HOST}x == "localhost"x
+if test "${host}"x == 'x' -o "${host}"x == "localhost"x
 then
-        # if hostname is meaningless, use MAC address of eth0, to have something unique
-        # Replace : by - in MAC address, as : is not supported by some file systems        
-	# Make sure there are no spaces after the MAC address like seems to be the case in Linux
-        HOST=$(/sbin/ifconfig $NIC | grep HWaddr | sed -e 's/^.*HWaddr \(.*\)$/\1/' -e 's/:/-/g' -e 's/ /g')
+  # if hostname is meaningless, use MAC address of first Ethernet
+  # NIC, to have something unique
+  host=$(ip a | grep 'link/ether' | head -1 | cut -d' ' -f 6 | sed 's/:/-/g')
 fi
 
-if test x{BWLIMIT}x == 'x'
-then	
-	BWLIMIT=0
+if test "${BWLIMIT}"x == 'x'
+then
+  BWLIMIT=0
 fi
 
 # backup data
 
-if test ${USESSH}x == "YES"x
+if test "${USESSH}"x == "YES"x
 then
-	SSHCOMMAND="ssh $SSHLOGIN"
-	RSYNCSSH="-e ssh"
-	DST=${SSHLOGIN}:${DESTINATION}
+  ssh_command="ssh ${SSHLOGIN}"
+  rsync_ssh_opt="-e ssh"
+  dest=${SSHLOGIN}:${DESTINATION}
 else
-	SSHCOMMAND=""
-	RSYNCSSH=""
-	SSHLOGIN=""
-	DST=$DESTINATION
+  ssh_command=""
+  rsync_ssh_opt=""
+  SSHLOGIN=""
+  dest="${DESTINATION}"
 fi
 
-cat >> $LOGTEMP << EOF
-Starting backup $NOW.
+cat >> "${log_temp}" << EOF
+Starting backup ${now}.
 
-Directories selected for backup: $BACKUPDIRS
-Destination: ${SSHLOGIN}:${DESTINATION}
+Directories selected for backup: ${BACKUPDIRS}
+dest: ${SSHLOGIN}:${DESTINATION}
 EOF
 
-if test ${KEEPOLDBACKUPS}x == "YES"x
+if test "${KEEPOLDBACKUPS}"x == "YES"x
 then
-	DST=${DST}/backup-${HOST}-${NOW}
-	PREVIOUSBACKUP=`${SSHCOMMAND} cat ${DESTINATION}/backup-${HOST}.timestamp 2>/dev/null`
-	# Only use --link-dest if it's not the first backup
-	if test ${PREVIOUSBACKUP}x != "x"
-	then
-		LINK="--link-dest=../backup-${HOST}-${PREVIOUSBACKUP}"
-		echo "Incremental backup to ${PREVIOUSBACKUP}" >> $LOGTEMP
-	fi
+  dest="${dest}/backup-${host}-${now}"
+  PREVIOUSBACKUP=$(${ssh_command} cat "${DESTINATION}/backup-${host}.timestamp" 2>/dev/null)
+  # Only use --link-dest if it's not the first backup
+  if test "${PREVIOUSBACKUP}"x != "x"
+  then
+    LINK="--link-dest=../backup-${host}-${PREVIOUSBACKUP}"
+    echo "Incremental backup to ${PREVIOUSBACKUP}" >> "${log_temp}"
+  fi
 else
-	LINK=""
-	DST=$DST/backup-${HOST}
+  LINK=""
+  dest=${dest}/backup-${host}
 fi
 
 
-trap "{ cat $LOGTEMP | mail -s 'Backup FAILURE $HOST $NOW' $EMAIL; rm $LOGTEMP; rm $CMDFILE 2>/dev/null; exit 1; }" ERR
+trap '{ cat ${log_temp} | mail -s "Backup FAILURE ${host} ${now}" $EMAIL; rm ${log_temp}; rm ${cmd_file} 2>/dev/null; exit 1; }' ERR
 
-#nice -n +19 rsync -vazHR --delete ${RSYNCSSH} --exclude-from=${EXCLUDEFILE} ${LINK} $BACKUPDIRS ${DST} --bwlimit=${BWLIMIT} 2>&1 > /dev/null | tee -a $LOGTEMP
+rsync --verbose \
+  --archive --hard-links --xattrs \
+  --compress \
+  --relative --delete \
+  ${rsync_ssh_opt} \
+  --exclude-from="${excludefile}" \
+  ${LINK} \
+  "${BACKUPDIRS}" "${dest}" \
+  --bwlimit="${BWLIMIT}" | tee -a "${log_temp}"
 
-#echo rsync -vazHR --delete ${RSYNCSSH} --exclude-from=${EXCLUDEFILE} ${LINK} $BACKUPDIRS ${DST} --bwlimit=${BWLIMIT} 2>&1 > /dev/null | tee -a $LOGTEMP
 
-rsync -vazHR --delete ${RSYNCSSH} --exclude-from=${EXCLUDEFILE} ${LINK} $BACKUPDIRS ${DST} --bwlimit=${BWLIMIT} | tee -a $LOGTEMP
-
-
-if test ${KEEPOLDBACKUPS}x == "YES"x
+if test "${KEEPOLDBACKUPS}"x == "YES"x
 then
 
 # -mtime option to find command ignores any fractional part
 # so to match -mtime +1, a file has to have been modified at least two days ago.
 # Subtract 1 from $DAYSTOKEEP for this reason
-MTIME=`expr $DAYSTOKEEP - 1`
+MTIME=$((DAYSTOKEEP - 1))
 
-cat << EOF > $CMDFILE
-	echo $NOW > ${DESTINATION}/backup-${HOST}.timestamp
-	# The following code checks that we still have $BACKUPSTOKEEP backups after deletion
-	# This is to prevent deletion of all backups, for example when time on server
-	# is not correct
-	TODELETE=\`find ${DESTINATION} -maxdepth 1  -type d -name "backup-${HOST}-*" -mtime +${MTIME} | wc -l\`
-	CURRENTBACKUPS=\`find ${DESTINATION} -maxdepth 1 -type d  -name "backup-${HOST}-*" | wc -l\`
-	REMAINING=\`expr \$CURRENTBACKUPS - \$TODELETE\`
-	if test \$REMAINING -ge $BACKUPSTOKEEP -a \$TODELETE -gt 0
-	then
-		find ${DESTINATION} -maxdepth 1 -type d -name "backup-${HOST}-*" -mtime +${MTIME} -exec rm -rf {} \;
-	fi
+cat << EOF > $cmd_file
+  echo $now > ${DESTINATION}/backup-${host}.timestamp
+  # The following code checks that we still have $BACKUPSTOKEEP backups after deletion
+  # This is to prevent deletion of all backups, for example when time on server
+  # is not correct
+  TODELETE=\$(find ${DESTINATION} -maxdepth 1  -type d -name "backup-${host}-*" -mtime +${MTIME} | wc -l\)
+  CURRENTBACKUPS=\$(find ${DESTINATION} -maxdepth 1 -type d  -name "backup-${host}-*" | wc -l\)
+  REMAINING=\$(expr \$CURRENTBACKUPS - \$TODELETE\)
+  if test \$REMAINING -ge $BACKUPSTOKEEP -a \$TODELETE -gt 0
+  then
+    find ${DESTINATION} -maxdepth 1 -type d -name "backup-${host}-*" -mtime +${MTIME} -exec rm -rf {} \;
+  fi
 EOF
 
-if test ${USESSH}x == "NO"x
+if test "${USESSH}"x == "NO"x
 then
-	.  $CMDFILE
+  .  "${cmd_file}"
 else
-	cat $CMDFILE | ${SSHCOMMAND} 2>/dev/null
+  "${ssh_command}" < "${cmd_file}"  2>/dev/null
 fi
-rm $CMDFILE
+rm "${cmd_file}"
 fi
 
-echo >> $LOGTEMP
-echo "Backup finished `date +%F-%H-%M-%S`" >> $LOGTEMP
- 
-cat $LOGTEMP 
-if test ${EMAIL}x != "x"
+echo >> "${log_temp}"
+echo "Backup finished $(date +%F-%H-%M-%S)" >> "${log_temp}"
+
+if test "${EMAIL}"x != "x"
 then
-	cat $LOGTEMP | mail -s "Backup report $HOST $NOW" $EMAIL 
+  mail -s "Backup report ${host} ${now}" "${EMAIL}" < "${log_file}"
 fi
-rm $LOGTEMP
+rm "${log_temp}"
