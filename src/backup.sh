@@ -4,7 +4,7 @@
 # we search backup.conf in /etc/, and if this neither exists,
 # we use the one in the current directory
 
-set -o nounset # Abort on unbound variable
+#set -o nounset # Abort on unbound variable
 
 cur_dir=$(dirname "${0}")
 
@@ -82,11 +82,11 @@ then
   # Only use --link-dest if it's not the first backup
   if test "${PREVIOUSBACKUP}"x != "x"
   then
-    LINK="--link-dest=../backup-${host}-${PREVIOUSBACKUP}"
+    link="--link-dest=../backup-${host}-${PREVIOUSBACKUP}"
     echo "Incremental backup to ${PREVIOUSBACKUP}" >> "${log_temp}"
   fi
 else
-  LINK=""
+  link=" "
   dest=${dest}/backup-${host}
 fi
 
@@ -99,7 +99,7 @@ rsync --verbose \
   --relative --delete \
   ${rsync_ssh_opt} \
   --exclude-from="${excludefile}" \
-  ${LINK} \
+  "${link}" \
   "${BACKUPDIRS}" "${dest}" \
   --bwlimit="${BWLIMIT}" | tee -a "${log_temp}"
 
