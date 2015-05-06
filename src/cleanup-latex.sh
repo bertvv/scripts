@@ -5,5 +5,6 @@
 # Clean up LaTeX help files
 
 rm -v ./*.aux ./*.log ./*.nav ./*.out ./*.snm ./*.toc \
-  ./*.bbl ./*.blg ./*.idx ./*.ilg ./*.ind ./*.tcp ./*.vrb
+  ./*.bbl ./*.blg ./*.idx ./*.ilg ./*.ind ./*.tcp ./*.vrb \
+  ./*.tps ./*.lof ./*.lot
 
