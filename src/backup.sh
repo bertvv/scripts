@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 # Read configuration file
 # First we search .backup.conf in homedir, if it does not exist,
 # we search backup.conf in /etc/, and if this neither exists,
@@ -83,11 +83,14 @@ then
   if test "${PREVIOUSBACKUP}"x != "x"
   then
     link="--link-dest=../backup-${host}-${PREVIOUSBACKUP}"
-    echo "Incremental backup to ${PREVIOUSBACKUP}" >> "${log_temp}"
+    echo "Incremental backup relative to ${PREVIOUSBACKUP}" >> "${log_temp}"
+  else
+    echo "Full backup" >> "${log_temp}"
   fi
 else
   link=" "
   dest=${dest}/backup-${host}
+  echo "Full backup" >> "${log_temp}"
 fi
 
 
