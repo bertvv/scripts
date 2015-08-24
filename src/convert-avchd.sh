@@ -7,7 +7,7 @@
 # Convert an AVCHD stream (*.MTS) to AVI format.
 
 set -o errexit  # abort on nonzero exitstatus
-set -o nounset  # abort on unbound variable
+#set -o nounset  # abort on unbound variable
 
 # {{{ Variables
 file="${1##*/}"            # Only the file name (without directory)
