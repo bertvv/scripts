@@ -22,20 +22,10 @@ set -u # abort on unbound variable
 
  #{{{ Variables
 top_dir="${HOME}/Documents/Vakken/"
-ac_year="14-15"
+ac_year="15-16"
 
 bookmark_dir="${HOME}/c/"
 #}}}
-#{{{ Functions
-
-usage() {
-cat << _EOF_
-Usage: ${0} 
-
-_EOF_
-}
-
-# }}}
 # Script proper
 
 # Cleanup current bookmark dir
