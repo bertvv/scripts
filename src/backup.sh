@@ -54,8 +54,6 @@ configuration() {
     dest="${DESTINATION}"
   fi
 
-  echo "BLAH"
-
   # Configure keeping old backups
   if [ "${KEEP_OLD_BACKUPS}" = 'YES' ]; then
     dest="${dest}/backup-${host}-${now}"
