@@ -72,7 +72,7 @@ cat >> "${log_temp}" << EOF
 Starting backup ${now}.
 
 Directories selected for backup: ${BACKUPDIRS}
-dest: ${SSHLOGIN}:${DESTINATION}
+dest: ${dest}
 EOF
 
 if test "${KEEPOLDBACKUPS}"x == "YES"x
@@ -115,7 +115,7 @@ then
 # Subtract 1 from $DAYSTOKEEP for this reason
 MTIME=$((DAYSTOKEEP - 1))
 
-cat << EOF > $cmd_file
+cat << EOF > "${cmd_file}"
   echo $now > ${DESTINATION}/backup-${host}.timestamp
   # The following code checks that we still have $BACKUPSTOKEEP backups after deletion
   # This is to prevent deletion of all backups, for example when time on server
@@ -123,7 +123,7 @@ cat << EOF > $cmd_file
   TODELETE=\$(find ${DESTINATION} -maxdepth 1  -type d -name "backup-${host}-*" -mtime +${MTIME} | wc -l\)
   CURRENTBACKUPS=\$(find ${DESTINATION} -maxdepth 1 -type d  -name "backup-${host}-*" | wc -l\)
   REMAINING=\$(expr \$CURRENTBACKUPS - \$TODELETE\)
-  if test \$REMAINING -ge $BACKUPSTOKEEP -a \$TODELETE -gt 0
+  if test \$REMAINING -ge ${BACKUPSTOKEEP} -a \$TODELETE -gt 0
   then
     find ${DESTINATION} -maxdepth 1 -type d -name "backup-${host}-*" -mtime +${MTIME} -exec rm -rf {} \;
   fi
@@ -143,6 +143,8 @@ echo "Backup finished $(date +%F-%H-%M-%S)" >> "${log_temp}"
 
 if test "${EMAIL}"x != "x"
 then
-  mail -s "Backup report ${host} ${now}" "${EMAIL}" < "${log_file}"
+  mail -s "Backup report ${host} ${now}" "${EMAIL}" < "${log_temp}"
+else
+  cp "${log_temp}" "${HOME}/.backup/backup.log"
 fi
 rm "${log_temp}"
