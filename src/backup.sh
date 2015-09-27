@@ -125,8 +125,12 @@ cleanup_old_backups() {
   if [ "${KEEP_OLD_BACKUPS}" == 'YES' ]; then
     mtime=$((DAYS_TO_KEEP -1))
 
-    cat << _EOF_ > "${cmd_file}"
-    echo "${now}" > "${timestamp}"
+    # Don't update the time stamp if a backup failed
+    if [ "${status}" -eq 0 ]; then
+      echo "echo ${now} > ${timestamp}" >> "${cmd_file}"
+    fi
+
+    cat << _EOF_ >> "${cmd_file}"
     # The following code checks that we still have ${BACKUPS_TO_KEEP} backups after deletion
     # This is to prevent deletion of all backups, for example when time on server
     # is not correct
@@ -154,6 +158,7 @@ _EOF_
 now=$(date +%F-%H-%M-%S)  # e.g. 2015-09-20-22-31
 log_temp=$(mktemp /tmp/backup.XXXXX)
 cmd_file=$(mktemp /tmp/backup.XXXXX)
+status=0
 
 get_host_name
 configuration
@@ -167,18 +172,26 @@ write_log_header
 
 trap 'export_log; cleanup_tmp; exit 1;' ERR
 
-
 # Do the actual backup
-rsync --verbose \
-  --archive --hard-links --xattrs \
-  --compress \
-  --relative --delete \
-  ${rsync_ssh_opt} \
-  --exclude-from="${excludefile}" \
-  "${link}" \
-  "${BACKUP_DIRS}" "${dest}" | tee --append "${log_temp}"
+for d in ${BACKUP_DIRS}; do
+  rsync_cmd="rsync --verbose --archive --hard-links --xattrs --compress
+    --relative --delete ${rsync_ssh_opt} --exclude-from=${excludefile}
+    ${link} ${d} ${dest}"
 
-status=$?
+  echo "== Backing up ${d} ==" | tee --append "${log_temp}"
+  echo "${rsync_cmd}" >> "${log_temp}"
+  ${rsync_cmd} 2>&1 | tee --append "${log_temp}"
+
+  current_status=${PIPESTATUS[0]}
+
+  # If this is the first failure, change $status
+  if [ "${current_status}" -ne 0 ]; then
+    echo "FAILED with status ${current_status}" | tee --append "${log_temp}"
+    if [ "${status}" -eq "0" ]; then
+      status=${current_status}
+    fi
+  fi
+done
 echo "Backup finished $(date +%F-%H-%M-%S) with status ${status}" | tee --append "${log_temp}"
 
 cleanup_old_backups
