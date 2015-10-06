@@ -23,8 +23,8 @@ VIDEO_SIZE="1366x768" # entire screen
 #AREA=":0.0+52,24"   # nice for capturing terminal demo
 AREA="${DISPLAY}.0+0.0"     # entire screen
 
-if [[ ! -d ${DIR} ]]; then
-    mkdir -p ${DIR}
+if [[ ! -d "${DIR}" ]]; then
+    mkdir -p "${DIR}"
 fi
 
 i=1
@@ -36,11 +36,11 @@ done
 
 ffmpeg -xerror -loglevel info \
     -f alsa -ac 2 -ar 48000 -i pulse \
-    -f x11grab -video_size ${VIDEO_SIZE} -i ${AREA} \ 
+    -f x11grab -video_size "${VIDEO_SIZE}" -i "${AREA}" \
     -vcodec libx264 -r 30 \
     -metadata author="Bert Van Vreckem" \
     -metadata copyright="CC-BY-SA" \
-    -metadata year=$(date +"%Y") \
-    -metadata date=$(date +"%Y-%m-%d") \
-    -metadata creation_time=$(date +"%Y-%m-%dT%T") \
-    -n ${OUT}
+    -metadata year="$(date +%Y)" \
+    -metadata date="$(date +%Y-%m-%d)" \
+    -metadata creation_time="$(date +%Y-%m-%dT%T)" \
+    -n "${OUT}"
