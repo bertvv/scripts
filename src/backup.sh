@@ -146,7 +146,7 @@ _EOF_
 
   echo "Cleaning up old backups" | tee --append "${log_temp}"
   if [ "${USE_SSH}" = "YES" ]; then
-    "${ssh_command}" < "${cmd_file}" 2>&1 | tee --append "${log_temp}"
+    ${ssh_command} < "${cmd_file}" 2>&1 | tee --append "${log_temp}"
   else
     . "${cmd_file}" 2>&1 | tee --append "${log_temp}"
   fi
