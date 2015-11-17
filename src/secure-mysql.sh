@@ -14,8 +14,12 @@ set -o nounset # abort on unbound variable
 
 usage() {
 cat << _EOF_
-Usage: ${0} "ROOT_PASSWORD"
-  with ROOT_PASSWORD the desired password for the database root user.
+
+Usage: ${0} "ROOT PASSWORD"
+
+  with "ROOT PASSWORD" the desired password for the database root user.
+
+Use quotes if your password contains spaces or other special characters.
 _EOF_
 }
 
