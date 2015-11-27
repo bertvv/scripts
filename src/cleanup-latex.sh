@@ -6,5 +6,5 @@
 
 rm -v ./*.aux ./*.log ./*.nav ./*.out ./*.snm ./*.toc \
   ./*.bbl ./*.blg ./*.idx ./*.ilg ./*.ind ./*.tcp ./*.vrb \
-  ./*.tps ./*.lof ./*.lot
+  ./*.tps ./*.lof ./*.lot 2> /dev/null
 
