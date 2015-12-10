@@ -22,10 +22,8 @@ _EOF_
 # with IP a (full) IP address. Returns exit status 0 if the specified host
 # replies to the tweet, a nonzero exit status otherwise.
 host_is_up() {
-  local result
-  # send one ping (-c) and wait at most 1 second (-w)
-  result=$(ping -c 1 -w 1 "${ip}" | grep '^64 bytes')
-  test -n "${result}"
+  # Send one ping (-c) and wait at most 1 second (-w)
+  ping -c 1 -w 1 "${ip}" > /dev/null 2>&1
 }
 
 #}}}
@@ -39,7 +37,9 @@ fi
 
 #}}}
 #{{{ Variables
+
 network="${1}"
+
 #}}}
 
 # Script proper
