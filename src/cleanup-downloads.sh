@@ -18,7 +18,7 @@ download_folder=~/Downloads
 
 # Notation: +n  => "At least n days"
 age="+21"
-log="${download_folder}/rmdown.log"
+log="${download_folder}/cleanup-downloads.log"
 
 #--------------------------------------------------------------------------
 # Script proper
