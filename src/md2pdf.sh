@@ -22,7 +22,7 @@ readonly SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 readonly MAIN_FONT="DejaVu Sans"
 readonly MONO_FONT="DejaVu Sans Mono"
 readonly FONT_SIZE="11pt"
-readonly MARGIN="1.5cm"
+readonly MARGINS="top=2cm, bottom=3cm, left=1.5cm, right=1.5cm"
 readonly PAPER_SIZE="a4paper"
 readonly OTHER_OPTIONS="--table-of-contents --number-sections"
 readonly LATEX_ENGINE="lualatex"
@@ -52,7 +52,7 @@ convert_markdown_file_to_pdf() {
     --variable mainfont="${MAIN_FONT}" \
     --variable monofont="${MONO_FONT}" \
     --variable fontsize="${FONT_SIZE}" \
-    --variable geometry:margin="${MARGIN}" \
+    --variable geometry:"${MARGINS}" \
     --variable geometry:"${PAPER_SIZE}" \
     ${OTHER_OPTIONS} \
     -f markdown "${file}" \
@@ -72,11 +72,9 @@ check_args() {
 # Print usage message on stdout
 usage() {
 cat << _EOF_
-Usage: ${0} [OPTIONS]... [ARGS]...
+Usage: ${0} [FILE]...
 
-  Converts a Markdown document to a PDF using pandoc.
-
-OPTIONS:
+  Converts the specified Markdown documents to PDF using pandoc.
 
 EXAMPLES:
 _EOF_
