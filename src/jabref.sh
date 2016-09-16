@@ -1,11 +1,68 @@
-#!/bin/bash
+#! /usr/bin/bash
 #
-# Created:  Wed 29 Apr 2009 03:13:59 PM CEST
-# Modified: Tue 25 Aug 2009 11:13:59 AM CEST
-# Author:   Bert Van Vreckem <bert.vanvreckem@gmail.com>
+# Author: Bert Van Vreckem <bert.vanvreckem@gmail.com>
 #
+# PURPOSE
+# See usage() for details.
 
-JABREF_HOME=/opt/jabref
-JABREF_JAR=JabRef-2.5.jar
+#{{{ Bash settings
+# abort on nonzero exitstatus
+set -o errexit
+# abort on unbound variable
+set -o nounset
+# don't hide errors within pipes
+set -o pipefail
+#}}}
+#{{{ Variables
+IFS=$'\t\n'   # Split on newlines and tabs (but not on spaces)
+readonly SCRIPT_NAME=$(basename "${0}")
+readonly JABREF_HOME="${HOME}/opt"
+#}}}
 
-java -jar ${JABREF_HOME}/${JABREF_JAR}
+
+
+main() {
+  check_args "${@}"
+  jabref_latest "${@}"
+
+}
+
+#{{{ Helper functions
+
+check_args() {
+  if [ "${#}" -ge 1 ]; then
+    if [ "${1}" = "-h" -o "${1}" = "--help" ]; then
+      usage
+      exit 0
+    fi
+  fi
+}
+
+# Print usage message on stdout
+usage() {
+cat << _EOF_
+Usage: ${SCRIPT_NAME} [OPTIONS]... [ARGS]...
+
+  Runs the latest version of Jabref installed in ${JABREF_HOME}
+
+OPTIONS:
+
+  -h, --help   Prints this help message
+
+Arguments are passed to JabRef verbatim.
+_EOF_
+}
+
+jabref_latest() {
+  local jabref_versions=(${JABREF_HOME}/JabRef*.jar)
+  local latest_version="${jabref_versions[-1]}"
+
+  printf "%s\n" "${latest_version}"
+  # Run the Jar in the background and print its PID
+  java -jar "${latest_version}" "${@}" & echo $!
+}
+
+#}}}
+
+main "${@}"
+
