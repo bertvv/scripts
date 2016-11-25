@@ -1,28 +1,45 @@
 #!/bin/bash
 #
-# Created:  Mon 11 Jun 2012 02:19:45 PM CEST
-# Modified: Fri 02 May 2014 08:57:46 am CEST CEST CEST CEST CEST CEST CEST CEST CEST CEST CEST
-# Author:   Bert Van Vreckem <bert.vanvreckem@gmail.com>
+# Generates random passphrases, as suggested by http://xkcd.com/936/
+
 #
-# generate a random passphrase, as suggested by http://xkcd.com/936/
-num=5
-sources=words
-#/usr/share/dict/words #/usr/share/dict/dutch
-#sources=/usr/share/hunspell/nl_BE.dic
-wordlist=$(mktemp) || exit 2
+# Variables
+#
 
+# Length of the passphrase
+num_words=5
+
+# Boundaries of word length
+min_word_length=4
+max_word_length=8
+
+# Text files containing one word per line
+sources="en-google-10000.txt nl-opensubtitles-10000.txt"
+
+# Temporary file containing selected words
+wordlist=$(mktemp)
+
+#
+# Select suitable words from the specified sources
+#
 for src in ${sources}; do
-    # take words from 2-10 chars and  avoid azerty/qwerty-confusion
-    grep '^[[:alnum:]]\{4,8\}$' ${src} \
-      > ${wordlist}
-#      | grep -iv "[amqwz]" \
+  # First, select only words of the specified length, then filter out words
+  # containing letters that can cause azerty/qwerty confusion
+  grep "^[[:alnum:]]\{${min_word_length},${max_word_length}\}$" "${src}" \
+    | grep --ignore-case --invert-match "[amqwz]" \
+    >> "${wordlist}"
 done
 
-while true; do
-  shuf -n $num $wordlist | xargs echo -n
+#
+# Generate passphrases of the specified length from the selected words
+#
+
+answer='y'
+until [ "${answer}" = 'n' ]; do
+  shuf --head-count="${num_words}" "${wordlist}" \
+    | xargs echo -n
   echo
-  read -s -p "[Enter] for more, [CtrlC] to exit."
-  echo -en "\r                                                     \r"
+  read -p "More? [Y/n] " answer
 done
 
-rm ${wordlist}
+rm "${wordlist}"
