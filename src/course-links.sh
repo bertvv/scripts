@@ -1,4 +1,4 @@
-#! /usr/bin/bash
+#! /usr/bin/env bash
 #
 # Author:   Bert Van Vreckem <bert.vanvreckem@gmail.com>
 #
@@ -22,7 +22,7 @@ set -u # abort on unbound variable
 
 #{{{ Variables
 readonly top_dirs="${HOME}/Documents/Vakken/ ${HOME}/Documents/Avondschool/"
-readonly ac_year="16-17"
+readonly ac_year="17-18"
 
 readonly bookmark_dir="${HOME}/c/"
 noop="false"

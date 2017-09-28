@@ -1,7 +1,5 @@
-#!/usr/bin/env bash
+#! /usr/bin/env bash
 #
-# Created:  Thu 20 Jun 2013 09:49:05 PM CEST
-# Modified: Thu 20 Jun 2013 11:26:46 PM CEST
 # Author:   Bert Van Vreckem <bert.vanvreckem@gmail.com>
 #
 # Install links for Java binaries to be used by update-alternatives

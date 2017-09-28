@@ -1,7 +1,5 @@
-#!/bin/bash
+#! /bin/bash
 #
-# Created:  Tue 22 Jan 2013 12:30:02 PM CET
-# Modified: Fri 01 Mar 2013 01:44:30 PM CET
 # Author:   Bert Van Vreckem <bert.vanvreckem@gmail.com>
 #
 SERVER="tin2fbo.hogent.be"

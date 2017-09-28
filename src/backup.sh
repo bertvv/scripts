@@ -174,13 +174,17 @@ trap 'export_log; cleanup_tmp; exit 1;' ERR
 
 # Do the actual backup
 for d in ${BACKUP_DIRS}; do
+  # the --rsync-path option is a workaround for an issue on Synology
+  # See https://forum.synology.com/enu/viewtopic.php?t=92627
   rsync_cmd="rsync --verbose --archive --hard-links --xattrs --compress
-    --relative --delete ${rsync_ssh_opt} --exclude-from=${excludefile}
+    --relative --delete  --rsync-path=/usr/bin/rsync ${rsync_ssh_opt} --exclude-from=${excludefile}
     ${link} ${d} ${dest}"
 
   echo "== Backing up ${d} ==" | tee --append "${log_temp}"
   echo "${rsync_cmd}" >> "${log_temp}"
+  set -x
   ${rsync_cmd} 2>&1 | tee --append "${log_temp}"
+  set +x
 
   current_status=${PIPESTATUS[0]}
 

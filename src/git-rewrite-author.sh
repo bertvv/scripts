@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 #
 # Amend the author in Git commits
 #

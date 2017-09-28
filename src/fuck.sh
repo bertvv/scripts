@@ -1,4 +1,4 @@
-#! /usr/bin/bash
+#! /usr/bin/env bash
 #
 # Source: https://gist.github.com/namuol/9122237/
 #

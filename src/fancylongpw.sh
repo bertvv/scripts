@@ -1,4 +1,4 @@
-#! /usr/bin/bash
+#! /usr/bin/env bash
 #
 # Author: Bert Van Vreckem <bert.vanvreckem@gmail.com>
 #
@@ -53,7 +53,6 @@ main() {
 
   generate_phrases
 
-  cleanup
 }
 
 #{{{ Helper functions
@@ -67,7 +66,7 @@ select_words() {
 }
 
 generate_phrases() {
-  for i in $(seq 1 ${num_phrases}); do
+  for ((i=0; i < num_phrases; i++)); do
     generate_phrase
   done
 }
@@ -76,6 +75,7 @@ generate_phrase() {
   shuf "${word_list}" \
     | head --lines="${num_words}" \
     | sed 's/\/.*//' \
+    | tr -d "'" \
     | xargs echo
 }
 
@@ -100,6 +100,16 @@ process_args() {
             opt_arg="${OPTARG#*=}"
             num_phrases="${opt_arg}"
             debug "Parsed option --num-phrases=${num_phrases}"
+            ;;
+          num-words)
+            opt_arg="${!OPTIND}"; OPTIND=$(( OPTIND + 1 ))
+            num_words="${opt_arg}"
+            debug "Parsed option --num-words ${num_words}"
+            ;;
+          num-words=*)
+            opt_arg="${OPTARG#*=}"
+            num_words="${opt_arg}"
+            debug "Parsed option --num-words=${num_words}"
             ;;
           *)
             if [ "${OPTERR}" = '1' ] || [ "${optspec:0:1}" = ':' ]; then

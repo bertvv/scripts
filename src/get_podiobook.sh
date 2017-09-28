@@ -1,7 +1,5 @@
-#!/bin/bash
+#! /bin/bash
 #
-# Created:  Mon 11 Aug 2008 01:56:27 PM CEST
-# Modified: Mon 11 Aug 2008 02:11:35 PM CEST
 # Author:   Bert Van Vreckem <Bert.Van.Vreckem@gmail.com>
 #
 

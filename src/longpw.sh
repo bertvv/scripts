@@ -1,7 +1,5 @@
-#!/bin/bash
+#! /bin/bash
 #
-# Created:  Mon 11 Jun 2012 02:19:45 PM CEST
-# Modified: Thu 01 May 2014 02:59:16 pm CEST CEST CEST CEST CEST CEST
 # Author:   Bert Van Vreckem <bert.vanvreckem@gmail.com>
 #
 # generate a random passphrase, as suggested by http://xkcd.com/936/

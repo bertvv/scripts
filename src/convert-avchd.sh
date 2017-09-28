@@ -1,7 +1,5 @@
-#!/usr/bin/env bash
+#! /usr/bin/env bash
 #
-# Created:  Tue 01 Oct 2013 09:09:17 am CEST
-# Modified: Tue 20 May 2014 11:02:46 pm CEST CEST CEST CEST CEST CEST CEST CEST CEST CEST CEST
 # Author:   Bert Van Vreckem <bert.vanvreckem@gmail.com>
 #
 # Convert an AVCHD stream (*.MTS) to AVI format.

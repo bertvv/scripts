@@ -1,4 +1,4 @@
-#! /usr/bin/bash
+#! /usr/bin/env bash
 #
 # Send output from a command into Gedit, e.g.
 #

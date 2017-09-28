@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#! /usr/bin/env bash
 #
 # Created:  Tue 18 Feb 2014 12:24:22 pm CET
 # Modified: Tue 25 Mar 2014 10:33:48 am CET CET CET CET CET CET CET CET

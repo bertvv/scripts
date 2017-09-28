@@ -1,7 +1,5 @@
-#!/bin/bash
+#! /bin/bash
 #
-# Created:  Tue 11 Jan 2011 03:01:10 PM CET
-# Modified: Fri 01 Mar 2013 01:46:24 PM CET
 # Author:   Bert Van Vreckem <bert.vanvreckem@gmail.com>
 #
 # Filter out card names and rarities from an MtG text spoiler file,

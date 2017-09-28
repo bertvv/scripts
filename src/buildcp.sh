@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /bin/bash
 #
 # buildcp -- builds a classpath with all jars in the specified directories.
 #

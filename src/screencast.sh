@@ -1,7 +1,5 @@
-#!/bin/bash
+#! /bin/bash
 #
-# Created:  Tue 19 Feb 2013 12:23:20 AM CET
-# Modified: Sun 13 Oct 2013 09:01:33 pm CEST CEST CEST CEST
 # Author:   Bert Van Vreckem <bert.vanvreckem@gmail.com>
 #
 # Screencast with avconv (ffmpeg)
