@@ -9,25 +9,36 @@
 # be installed, just make it executable, otherwise it will be skipped.
 #
 
+#{{{ Bash settings
+# abort on nonzero exitstatus
+set -o errexit
+# abort on unbound variable
+set -o nounset
+# don't hide errors within pipes
+set -o pipefail
+#}}}
+#{{{ Variables
+IFS=$'\t\n'   # Split on newlines and tabs (but not on spaces)
+
 # installation destination directory
-dst_dir=${HOME}/bin
+readonly dst_dir=${HOME}/.local/bin
 
 # directory where this script is located (should contain
 # subdirectory src/ containing the actual scripts
-script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+readonly script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # script directory
-src_dir=${script_dir}/src
+readonly src_dir=${script_dir}/src
 
 # scripts to be installed. If you want a script to be installed, make it
 # executable
-to_install=$(find ${src_dir} -type f \( -executable -and ! -iname ".*" \) -printf '%f\n')
+to_install=$(find "${src_dir}" -type f \( -executable -and ! -iname ".*" \) -printf '%f\n')
+#}}}
 
-
-for s in $(echo ${to_install}); do
+for s in ${to_install}; do
   # determine path to source and destination files
-  source_file=${src_dir}/${s}
-  destination_file=${dst_dir}/${s%.*}  # remove extension from link
+  source_file="${src_dir}/${s}"
+  destination_file="${dst_dir}/${s%.*}"  # remove extension from link
 
   if [[ ! -f "${source_file}" ]]; then
 
@@ -43,7 +54,7 @@ for s in $(echo ${to_install}); do
     fi
 
     # create the link
-    ln -vsf ${source_file} ${destination_file}
+    ln -vsf "${source_file}" "${destination_file}"
 
   fi
 done
