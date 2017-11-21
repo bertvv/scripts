@@ -17,18 +17,14 @@ readonly script_name=$(basename "${0}")
 readonly script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 IFS=$'\t\n'   # Split on newlines and tabs (but not on spaces)
 
-readonly roles='bertvv.bind
-bertvv.dhcp
-bertvv.dnsmasq
-bertvv.httpd
-bertvv.mariadb
-bertvv.pxeserver
-bertvv.rh-base
-bertvv.samba
-bertvv.tftp
-bertvv.tomcat
-bertvv.vsftpd
-bertvv.wordpress'
+# Color definitions
+readonly reset='\e[0m'
+readonly cyan='\e[0;36m'
+readonly red='\e[0;31m'
+readonly yellow='\e[0;33m'
+
+readonly galaxy_user=bertvv
+readonly roles=$(ansible-galaxy search --author "${galaxy_user}" | grep "${galaxy_user}" | awk '{print $1}')
 
 #}}}
 
@@ -53,12 +49,6 @@ install_role() {
 
   ansible-galaxy install --force "${@}" "${role}"
 }
-
-# Color definitions
-readonly reset='\e[0m'
-readonly cyan='\e[0;36m'
-readonly red='\e[0;31m'
-readonly yellow='\e[0;33m'
 
 # Usage: info [ARG]...
 #
