@@ -35,6 +35,10 @@ readonly src_dir=${script_dir}/src
 to_install=$(find "${src_dir}" -type f \( -executable -and ! -iname ".*" \) -printf '%f\n')
 #}}}
 
+if [ ! -d "${dst_dir}" ]; then
+  mkdir -p "${dst_dir}"
+fi
+
 for s in ${to_install}; do
   # determine path to source and destination files
   source_file="${src_dir}/${s}"
