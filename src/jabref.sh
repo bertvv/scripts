@@ -16,7 +16,7 @@ set -o pipefail
 #{{{ Variables
 IFS=$'\t\n'   # Split on newlines and tabs (but not on spaces)
 readonly SCRIPT_NAME=$(basename "${0}")
-readonly JABREF_HOME="${HOME}/opt"
+readonly JABREF_HOME="${HOME}/.local/opt"
 #}}}
 
 
