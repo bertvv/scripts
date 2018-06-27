@@ -4,8 +4,8 @@
 #
 #/ Usage: find-file-versions FILENAME [DIR]
 #/
-#/   Searches for the specified files in the specified directory (or the user's
-#/ home). The script will compare all files and show which are identical and
+#/   Searches for the specified files in the specified (or current) directory.
+#/ The script will compare all files and show which are identical and
 #/ which are different (according to their SHA1 checksum).
 #/
 #/ OPTIONS
@@ -40,7 +40,7 @@ readonly yellow='\e[0;33m'
 # Debug info ('on' to enable)
 readonly debug='on'
 
-search_dir="${HOME}"
+search_dir="${PWD}"
 file_name=""
 
 #}}}
@@ -83,32 +83,34 @@ check_args() {
 
   file_name="${1}"
 
-  if [ -n "${2}" ]; then
+  if [ "${#}" -ge '2' ]; then
     search_dir="${2}"
   fi
 }
 
 find_files() {
-  find "${search_dir}" -type f -name "${file_name}"
+  find "${search_dir}" -type f -name "${file_name}" -print0
 }
 
 calculate_checksums() {
-  xargs sha1sum
+  xargs --null sha1sum
 }
 
 organize_versions() {
   local current_checksum=''
 
   while read -r line; do
-    local checksum="${line%% *}"
+    local checksum="${line% *}"
     local file="${line##* }"
+    local change_date
+    change_date=$(stat --format=%y "${file}")
 
     if [ "${checksum}" != "${current_checksum}" ]; then
       printf "${yellow}%s${reset}\\n" "${checksum}"
       current_checksum="${checksum}"
     fi
 
-    printf "${cyan}%s${reset}\\n" "${file}"
+    printf "${cyan}%s${reset}\\t%s\\n" "${change_date}" "${file}"
   done
 }
 
