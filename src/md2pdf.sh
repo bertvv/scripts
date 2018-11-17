@@ -56,7 +56,7 @@ convert_markdown_file_to_pdf() {
     --variable geometry:"${PAPER_SIZE}" \
     ${OTHER_OPTIONS} \
     -f markdown "${file}" \
-    --latex-engine="${LATEX_ENGINE}" \
+    --pdf-engine="${LATEX_ENGINE}" \
     -o "${output}"
 }
 
