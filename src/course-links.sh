@@ -21,8 +21,8 @@ set -e # abort on nonzero exitstatus
 set -u # abort on unbound variable
 
 #{{{ Variables
-readonly top_dirs="${HOME}/Documents/Vakken/ ${HOME}/Documents/Avondschool/"
-readonly ac_year="17-18"
+readonly top_dirs="${HOME}/Documents/Vakken/"
+readonly ac_year="18-19"
 
 readonly bookmark_dir="${HOME}/c/"
 noop="false"
