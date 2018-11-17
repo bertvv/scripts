@@ -40,10 +40,10 @@ main() {
 # Check if command line arguments are valid
 check_args() {
   if [ "${#}" -ne "0" ]; then
-    if [ "${1}" = "-h" -o "${1}" = "--help" -o "${1}" = "-?" ]; then
+    if [ "${1}" = "-h" ] || [ "${1}" = "--help" ] || [ "${1}" = "-?" ]; then
       usage
       exit 0
-    elif [ "${1}" = "-n" -o "${1}" = "--numeric" ]; then
+    elif [ "${1}" = "-n" ] || [ "${1}" = "--numeric" ]; then
       final_sort="sort --numeric-sort --reverse"
     fi
   fi
