@@ -16,7 +16,7 @@ FILE=record
 EXT=mkv
 # Size
 #VIDEO_SIZE="800x600"  # nice for capturing terminal demo
-VIDEO_SIZE="1366x768" # entire screen 
+VIDEO_SIZE="1920x1080" # entire screen 
 # Offset
 #AREA=":0.0+52,24"   # nice for capturing terminal demo
 AREA="${DISPLAY}.0+0.0"     # entire screen
@@ -41,4 +41,5 @@ ffmpeg -xerror -loglevel info \
     -metadata year="$(date +%Y)" \
     -metadata date="$(date +%Y-%m-%d)" \
     -metadata creation_time="$(date +%Y-%m-%dT%T)" \
-    -n "${OUT}"
+    -n "${OUT}" \
+    -r 60000/1001 -async 1 -vsync 1
