@@ -54,7 +54,7 @@ _EOF_
 }
 
 jabref_latest() {
-  local jabref_versions=(${JABREF_HOME}/JabRef*.jar)
+  local jabref_versions=("${JABREF_HOME}"/JabRef*.jar)
   local latest_version="${jabref_versions[-1]}"
 
   printf "%s\n" "${latest_version}"
