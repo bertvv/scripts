@@ -2,7 +2,11 @@
 #
 # Author: Bert Van Vreckem <bert.vanvreckem@gmail.com>
 #
-# Install the specified Ansible roles in ~/.ansible/roles
+# Install all Ansible roles published by an author on Ansible Galaxy.
+#
+#/ Usage: install-ansible-roles [OPTION]...
+#/
+#/   OPTIONs are passed on to the ansible-galaxy command
 
 #{{{ Bash settings
 # abort on nonzero exitstatus
@@ -30,6 +34,7 @@ readonly roles=$(ansible-galaxy search --author "${galaxy_user}" | grep "${galax
 
 main() {
   debug "Options: ${*}"
+  debug "Roles:   ${roles}"
   install_roles "${@}"
 
 }
