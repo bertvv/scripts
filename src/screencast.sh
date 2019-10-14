@@ -28,7 +28,7 @@ fi
 i=1
 OUT="${DIR}/${FILE}-$(printf "%03d" ${i}).${EXT}"
 while [[ -f "${OUT}" ]]; do
-    let i++
+    (( i++ ))
     OUT="${DIR}/${FILE}-$(printf "%03d" ${i}).${EXT}"
 done
 
@@ -41,5 +41,5 @@ ffmpeg -xerror -loglevel info \
     -metadata year="$(date +%Y)" \
     -metadata date="$(date +%Y-%m-%d)" \
     -metadata creation_time="$(date +%Y-%m-%dT%T)" \
-    -n "${OUT}" \
-    -r 60000/1001 -async 1 -vsync 1
+    -r 60000/1001 -async 1 -vsync 1 \
+    -n "${OUT}"
