@@ -118,10 +118,10 @@ search_git_dirs() {
     fi
   done
 
-  printf 'Found %d repos with local changes\n' "${num_dirty}" >&2
+  log "Found ${num_dirty} repos with local changes"
 
   if [ "${verbosity}" -eq 1 ]; then
-    printf 'Found %d clean repos\n' "${num_clean}" >&2
+    log "Found ${num_clean} clean repos"
   fi
 }
 
