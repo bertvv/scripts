@@ -32,7 +32,7 @@ readonly src_dir=${script_dir}/src
 
 # scripts to be installed. If you want a script to be installed, make it
 # executable
-to_install=$(find "${src_dir}" -type f \( -executable -and ! -iname ".*" \) -printf '%f\n')
+to_install=$(find "${src_dir}" -type f \( -executable -and ! -iname ".*" \) -printf '%f\n' | sort)
 #}}}
 
 if [ ! -d "${dst_dir}" ]; then
@@ -55,10 +55,10 @@ for s in ${to_install}; do
     # that is not a link, it should not be overwritten
     if [[ -f "${destination_file}" && ! -h "${destination_file}" ]]; then
       echo "Skipping ${destination_file}: already exists, is a regular file" >&2
+    else
+      # create the link
+      ln -vsf "${source_file}" "${destination_file}"
     fi
-
-    # create the link
-    ln -vsf "${source_file}" "${destination_file}"
 
   fi
 done
