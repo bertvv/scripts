@@ -13,7 +13,7 @@ DIR=${HOME}/Videos/screencast
 # file, without extension
 FILE=record
 # output type
-EXT=mkv
+EXT=mp4
 # Size
 #VIDEO_SIZE="800x600"  # nice for capturing terminal demo
 VIDEO_SIZE="1920x1080" # entire screen 
@@ -36,6 +36,7 @@ ffmpeg -xerror -loglevel info \
     -f alsa -ac 2 -ar 48000 -i pulse \
     -f x11grab -video_size "${VIDEO_SIZE}" -i "${AREA}" \
     -vcodec libx264 -r 30 \
+    -codec:a aac \
     -metadata author="Bert Van Vreckem" \
     -metadata copyright="CC-BY-SA" \
     -metadata year="$(date +%Y)" \
