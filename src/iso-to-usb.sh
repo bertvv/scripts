@@ -28,24 +28,21 @@ set -o pipefail
 readonly script_name=$(basename "${0}")
 readonly script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 IFS=$'\t\n'   # Split on newlines and tabs (but not on spaces)
+dependencies=(dd pv stat)
 
-# Color definitions
-readonly reset='\e[0m'
-readonly cyan='\e[0;36m'
-readonly red='\e[0;31m'
-readonly yellow='\e[0;33m'
 # Debug info ('on' to enable)
 readonly debug='on'
 
 #}}}
 
 main() {
+  check_dependencies
   check_args "${@}"
 
   local iso="${1}"
   local destination="${2}"
 
-  info "Copying ${iso} to ${destination}"
+  log "Copying ${iso} to ${destination}"
 
   check_mounts "${destination}"
   confirm_copy
@@ -54,16 +51,36 @@ main() {
 
 #{{{ Helper functions
 
+check_dependencies() {
+  debug "Checking dependencies"
+  for dep in "${dependencies[@]}"; do
+    check_command_exists "${dep}"
+  done
+}
+
+# Usage: check_command_exists COMMAND
+check_command_exists() {
+  local command="${1}"
+  if ! command -v "${command}" > /dev/null 2>&1; then
+    error "Command ${command} is needed but not available, please install it first. Bailing out."
+    exit 1
+  fi
+}
+
 # Usage: check_mounts DEVICE
 check_mounts() {
   local device="${1}"
 
-  info "Checking if ${device} is currently mounted"
-  mount | grep "${device}"
+  log "Checking if ${device} is currently mounted"
+
+  if grep "${device}" /proc/mounts > /dev/null 2>&1; then
+    error "Device ${device} is mounted, bailing out"
+    exit 1
+  fi
 }
 
 confirm_copy() {
-  info "Are you sure you want to continue? [y/N]"
+  log "Are you sure you want to continue? [y/N]"
   read -r confirm
   if [ "${confirm}" != 'y' ] && [ "${confirm}" != 'Y' ]; then
     info "Cancelled on user's request"
@@ -127,11 +144,11 @@ check_args() {
   fi
 }
 
-# Usage: info [ARG]...
+# Usage: log [ARG]...
 #
 # Prints all arguments on the standard output stream
-info() {
-  printf "${yellow}>>> %s${reset}\n" "${*}"
+log() {
+  printf '\e[0;33m>>> %s\e[0m\n' "${*}"
 }
 
 # Usage: debug [ARG]...
@@ -139,16 +156,15 @@ info() {
 # Prints all arguments on the standard output stream,
 # if debug output is enabled
 debug() {
-  [ "${debug}" != 'on' ] || printf "${cyan}### %s${reset}\n" "${*}"
+  [ "${debug}" != 'on' ] || printf '\e[0;36m### %s\e[0m\n' "${*}"
 }
 
 # Usage: error [ARG]...
 #
 # Prints all arguments on the standard error stream
 error() {
-  printf "${red}!!! %s${reset}\n" "${*}" 1>&2
+  printf '\e[0;31m!!! %s\e[0m\n' "${*}" 1>&2
 }
-
 
 #}}}
 
