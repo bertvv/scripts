@@ -19,13 +19,8 @@ readonly script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 #IFS=$'\t\n'   # Split on newlines and tabs (but not on spaces)
 
 # Conversion settings
-readonly main_font="DejaVu Sans"
-readonly mono_font="DejaVu Sans Mono"
-readonly font_size="12pt"
-readonly margins="top=2cm, bottom=3cm, left=1.5cm, right=1.5cm"
-readonly paper_size="a4paper"
 readonly other_options='' #"--number-sections" # --table-of-contents 
-readonly latex_engine="lualatex"
+readonly latex_engine="xelatex"
 #}}}
 
 main() {
@@ -49,11 +44,6 @@ convert_markdown_file_to_pdf() {
   local output="${file%.*}.pdf"
 
   pandoc \
-    --variable mainfont="${main_font}" \
-    --variable monofont="${mono_font}" \
-    --variable fontsize="${font_size}" \
-    --variable geometry:"${margins}" \
-    --variable geometry:"${paper_size}" \
     ${other_options} \
     -f markdown "${file}" \
     --pdf-engine="${latex_engine}" \
