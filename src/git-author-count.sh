@@ -21,11 +21,23 @@ readonly SCRIPT_NAME=$(basename "${0}")
 readonly SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 IFS=$'\t\n'   # Split on newlines and tabs (but not on spaces)
 
+# Debug info ('on' to enable)
+readonly debug='on'
+
 final_sort=cat
 #}}}
 
 main() {
   check_args "${@}"
+
+  log "Number of commits"
+
+  git log --pretty='format:%an' \
+    | sort --ignore-case \
+    | uniq --ignore-case --count \
+    | eval ${final_sort}
+
+  log "Number of lines"
 
   git ls-files \
     | xargs --max-args=1 --delimiter='\n' git blame --line-porcelain \
@@ -74,6 +86,29 @@ REMARKS:
   the results.
 _EOF_
 }
+
+# Usage: log [ARG]...
+#
+# Prints all arguments on the standard output stream
+log() {
+  printf '\e[0;33m>>> %s\e[0m\n' "${*}"
+}
+
+# Usage: debug [ARG]...
+#
+# Prints all arguments on the standard output stream,
+# if debug output is enabled
+debug() {
+  [ "${debug}" != 'on' ] || printf '\e[0;36m### %s\e[0m\n' "${*}"
+}
+
+# Usage: error [ARG]...
+#
+# Prints all arguments on the standard error stream
+error() {
+  printf '\e[0;31m!!! %s\e[0m\n' "${*}" 1>&2
+}
+
 
 #}}}
 

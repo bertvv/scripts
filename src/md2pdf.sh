@@ -43,11 +43,13 @@ convert_markdown_file_to_pdf() {
   local file="${1}"
   local output="${file%.*}.pdf"
 
+  set -x
   pandoc \
     ${other_options} \
     -f markdown "${file}" \
     --pdf-engine="${latex_engine}" \
     -o "${output}"
+  set +x
 }
 
 # Check if command line arguments are valid
@@ -57,16 +59,62 @@ check_args() {
     usage
     exit 2
   fi
+
+  if [ "${1}" = '-h' ] || [ "${1}" = '--help' ]; then
+    usage
+    exit 0
+  fi
+
+  if [ "${1}" = '-t' ] || [ "${1}" = '--template' ]; then
+    print_template
+    exit 0
+  fi
+
 }
 
 # Print usage message on stdout
 usage() {
 cat << _EOF_
-Usage: ${0} [FILE]...
+Usage: ${0} FILE...
+       ${0} -h|--help
+       ${0} -t|--template
 
-  Converts the specified Markdown documents to PDF using pandoc.
+Converts the specified Markdown documents to PDF using pandoc.
 
-EXAMPLES:
+OPTIONS
+
+-h, --help
+
+  Prints this help message
+
+-t, --template
+
+  Prints a template for a Markdown document with a YAML heading specifying
+  the layout (fonts, margin, title, etc)
+_EOF_
+}
+
+print_template() {
+cat << _EOF_
+---
+title: 'Titel'
+subtitle: 'Subtitel'
+author: 'Auteur'
+date: 'Datum'
+lang: nl-BE
+documentclass: article
+mainfont: Montserrat
+monofont: Fira Code
+fontsize: 11pt
+papersize: a4paper
+geometry: margin=2cm
+abstract: |
+  Samenvatting
+...
+
+# Sectie1
+
+
 _EOF_
 }
 

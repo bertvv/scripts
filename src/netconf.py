@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 
+import os
 import socket
 import fcntl
 import struct
@@ -66,10 +67,9 @@ def get_name_servers():
             for line in open('/etc/resolv.conf')
             if PREFIX in line]
 
-print(Fore.YELLOW + 'IP addresses')
-print('Iface\tIP address\tNetwork mask')
+print(Fore.YELLOW + 'Iface             IP address        Network mask')
 for iface in network_interfaces():
-    print('{0}\t{1}\t{2}'.format(
+    print('{0: <17} {1: <17} {2: <17}'.format(
         iface,
         get_ip_address(iface),
         get_netmask(iface)))
@@ -89,3 +89,5 @@ if dns_servers:
         print(dns)
 else:
     print(Fore.RED + 'None')
+
+os.system('resolvectl dns')
