@@ -19,7 +19,7 @@
 
 #{{{ Bash settings
 # abort on nonzero exitstatus
-set -o errexit
+#set -o errexit
 # abort on unbound variable
 set -o nounset
 # don't hide errors within pipes
