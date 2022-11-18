@@ -3,8 +3,8 @@
 # van de opgegeven cijfers, in willekeurige volgorde
 
 # Lijst met de gewenste maaltafels
-tafels = [2, 10]
-#tafels = 1.upto(10)
+#tafels = [2, 10]
+tafels = 1.upto(10)
 
 # Lijst met alle gegenereerde oefeningen
 maaltafels = []
