@@ -4,8 +4,8 @@
 #
 # generate a random passphrase, as suggested by http://xkcd.com/936/
 num=4
-#sources=/usr/share/dict/words
-sources=/usr/share/myspell/nl_BE.dic
+sources=/usr/share/dict/words
+#sources=/usr/share/myspell/nl_BE.dic
 wordlist=$(mktemp) || exit 2
 
 for src in ${sources}; do
