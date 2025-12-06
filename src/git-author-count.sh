@@ -8,6 +8,16 @@
 # Source:
 #   http://www.commandlinefu.com/commands/view/3889/prints-per-line-contribution-per-author-for-a-git-repository
 
+#
+# Tip: which files did a specific author contribute to?
+#
+# git ls-files \
+#   | xargs --max-args=1 --delimiter='\n' git blame -f |
+#   | grep -i AUTHOR \
+#   | awk '{print $2}' \
+#   | sort | uniq -c
+#
+
 #{{{ Bash settings
 # abort on nonzero exitstatus
 set -o errexit
@@ -17,12 +27,9 @@ set -o nounset
 set -o pipefail
 #}}}
 #{{{ Variables
-readonly SCRIPT_NAME=$(basename "${0}")
-readonly SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+SCRIPT_NAME=$(basename "${0}")
 IFS=$'\t\n'   # Split on newlines and tabs (but not on spaces)
-
-# Debug info ('on' to enable)
-readonly debug='on'
+readonly SCRIPT_NAME
 
 final_sort=cat
 #}}}
@@ -91,24 +98,8 @@ _EOF_
 #
 # Prints all arguments on the standard output stream
 log() {
-  printf '\e[0;33m>>> %s\e[0m\n' "${*}"
+  printf 'ℹ️ \e[0;33m%s\e[0m\n' "${*}"
 }
-
-# Usage: debug [ARG]...
-#
-# Prints all arguments on the standard output stream,
-# if debug output is enabled
-debug() {
-  [ "${debug}" != 'on' ] || printf '\e[0;36m### %s\e[0m\n' "${*}"
-}
-
-# Usage: error [ARG]...
-#
-# Prints all arguments on the standard error stream
-error() {
-  printf '\e[0;31m!!! %s\e[0m\n' "${*}" 1>&2
-}
-
 
 #}}}
 
