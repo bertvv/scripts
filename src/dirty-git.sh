@@ -2,20 +2,29 @@
 #
 # Author: Bert Van Vreckem <bert.vanvreckem@gmail.com>
 #
-#/ Usage: dirty-git [OPTIONS]... [DIR]
-#/
-#/ Search the specified directory (or the user's home) for Git repositories with
-#/ local changes.
-#/
-#/ OPTIONS
-#/   -h, --help
-#/                 Print this help message and exit
-#/   -v, --verbose
-#/                 Also print clean repositories
-#/
-#/ EXAMPLES
-#/  dirty-git
-#/  dirty-git -v Development
+#: Usage: dirty-git [OPTIONS]... [DIR]
+#:
+#: Search the specified directory (or the user's home) for Git repositories with
+#: local changes.
+#:
+#: OPTIONS
+#:   -h, --help
+#:                 Print this help message and exit
+#:   -v, --verbose
+#:                 Increase verbosity level (default = 0)
+#:                 Can be repeated with -v -v or -vv
+#:
+#: VERBOSITY
+#: 
+#:   0  Only show repos with local changes
+#:   1  Also show repos without local changes
+#:   2  Also show debug output
+#:   3- Higher values are ignored
+#:
+#: EXAMPLES
+#:   dirty-git
+#:   dirty-git -v Development
+#:   dirty-git -vv Development
 
 #{{{ Bash settings
 # abort on nonzero exitstatus
@@ -26,21 +35,13 @@ set -o nounset
 set -o pipefail
 #}}}
 #{{{ Variables
-readonly script_name=$(basename "${0}")
-readonly script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+script_name=$(basename "${0}")
+script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+readonly script_dir script_name
 IFS=$'\t\n'   # Split on newlines and tabs (but not on spaces)
 
-# Color definitions
-readonly reset='\e[0m'
-readonly cyan='\e[0;36m'
-readonly red='\e[0;31m'
-readonly yellow='\e[0;33m'
-readonly green='\e[0;32m'
-# Debug info ('on' to enable)
-readonly debug='off'
-
-readonly status_ok="${green}✓${reset}"
-readonly status_fail="${red}✗${reset}"
+readonly status_ok="\e[0;32m✓\e[0m"
+readonly status_fail="\e[0;31m✗\e[0m"
 
 #
 # Default configuration, to be changed with command line arguments
@@ -49,6 +50,7 @@ readonly status_fail="${red}✗${reset}"
 # Verbosity:
 # 0 - only print repos with local changes
 # 1 - also print clean repos
+# 2 - also print debug output
 verbosity=0
 
 # Directory to be searched
@@ -70,8 +72,13 @@ check_args() {
         exit 0
         ;;
       -v|--verbose)
-        debug "Setting verbosity on"
-        verbosity=1
+        debug "Increasing verbosity level"
+        verbosity=$(( verbosity + 1 ))
+        shift
+        ;;
+      -vv)
+        debug "Increasing verbosity level 2x"
+        verbosity=$(( verbosity + 2 ))
         shift
         ;;
       -*)
@@ -100,29 +107,44 @@ search_git_dirs() {
   local num_dirty=0
   local num_clean=0
   local repos
-  repos=$(find "${search_dir}" -type d -name '.git')
+  repos=$(find "${search_dir}" -type d -name '.git' 2> /dev/null)
 
   for repo in ${repos}; do
     repo_dir="${repo%.git}"
     debug "Checking ${repo_dir}"
+
     if is_repo_clean "${repo_dir}"; then
       debug "Clean"
-      if [ "${verbosity}" -eq '1' ]; then
-        num_clean=$(( num_clean + 1 ))
-        printf '%b %s\n' "${status_ok}" "${repo_dir}"
-      fi
+      num_clean=$(( num_clean + 1 ))
+      list_clean "${repo_dir}"
     else
       debug "Dirty"
       num_dirty=$(( num_dirty + 1 ))
-      printf '%b %s\n' "${status_fail}" "${repo_dir}"
+      list_dirty "${repo_dir}"
     fi
   done
 
   log "Found ${num_dirty} repos with local changes"
+  log "Found ${num_clean} clean repos"
+}
 
-  if [ "${verbosity}" -eq 1 ]; then
-    log "Found ${num_clean} clean repos"
+# Usage: list_clean PATH
+#   Print the path to the specified directory as a clean repo.
+list_clean() {
+  local path="${1}"
+
+  if [ "${verbosity}" -ge '1' ]; then
+    printf '%b %s\n' "${status_ok}" "${path}"
   fi
+
+}
+
+# Usage: list_dirty PATH
+#   Print the path to the specified directory as a repo with local changes.
+list_dirty() {
+  local path="${1}"
+
+  printf '%b %s\n' "${status_fail}" "${repo_dir}"
 }
 
 # Usage: is_repo_clean DIR
@@ -133,9 +155,9 @@ is_repo_clean() {
   local git_repo="${1}"
   local result
 
-  pushd "${git_repo}" > /dev/null
+  pushd "${git_repo}" > /dev/null || exit 4
   result=$(git status --short)
-  popd > /dev/null
+  popd > /dev/null || exit 4
 
   # Repo is clean if ${result} is empty
   [ -z "${result}" ]
@@ -143,31 +165,32 @@ is_repo_clean() {
 
 # Print usage message on stdout by parsing start of script comments
 usage() {
-  grep '^#/' "${script_dir}/${script_name}" | sed 's/^#\/\w*//'
+  grep '^#:\s*' "${script_dir}/${script_name}" \
+    | cut --characters=4-
 }
 
-# Usage: log [ARG]...
-#
-# Prints all arguments on the standard error stream
+# Usage: log MESSAGE...
+#  Prints a log message to stdout.
 log() {
-  printf "${yellow}>>> %s${reset}\\n" "${*}" >&2
+  local message="$*"
+  printf 'ℹ️ \033[1;34m%s\033[0m\n' "${message}"
 }
 
-# Usage: debug [ARG]...
-#
-# Prints all arguments on the standard output stream,
-# if debug output is enabled
+# Usage: debug MESSAGE...
+#  Prints a debug message to stderr, if debug output is turned on.
 debug() {
-  [ "${debug}" != 'on' ] || printf "${cyan}### %s${reset}\\n" "${*}" >&2
+  if [ "${verbosity}" -ge '2' ]; then
+    local message="$*"
+    printf '🐛 \033[1;33m%s\033[0m\n' "${message}" >&2
+  fi
 }
 
-# Usage: error [ARG]...
-#
-# Prints all arguments on the standard error stream
+# Usage: error MESSAGE...
+#  Prints an error message to stderr.
 error() {
-  printf "${red}!!! %s${reset}\\n" "${*}" 1>&2
+  local message="$*"
+  printf '🚨 \033[1;31m%s\033[0m\n' "${message}" >&2
 }
-
 
 #}}}
 
